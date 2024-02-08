@@ -1,0 +1,10 @@
+Django>=3.2,<4.0
+djangorestframework
+psycopg2
+psycopg2-binary
+django-cors-headers
+django-prometheus
+requests
+channels
+httpx
+daphne
