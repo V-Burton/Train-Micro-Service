@@ -1,7 +1,8 @@
 from django.http import JsonResponse
 from .models import QueueEntry, GameSession
 from django.views.decorators.http import require_http_methods
-from .api import create_game_instance
+from pong_app.consumers import create_game_instance
+
 
 @require_http_methods(["POST"])
 def join_queue(request):
@@ -30,3 +31,5 @@ def local_game(request):
     request.user.session_id = session.id
     request.user.save()
     return JsonResponse({'status': 'success', 'message': 'Successfully created a local game', 'session_id': session.id})
+
+

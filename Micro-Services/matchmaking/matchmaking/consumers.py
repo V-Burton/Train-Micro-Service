@@ -3,8 +3,7 @@ from channels.generic.websocket import AsyncWebsocketConsumer
 from channels.db import database_sync_to_async
 from .models import QueueEntry
 from .matchmaking import match_users
-from pong_app.consumers import remove_channel_name_from_session
-
+from api import remove_channel_name_from_session_api
 
 class QueueConsumer(AsyncWebsocketConsumer):
     """WebSocket consumer that handles the matchmaking queue logic."""
@@ -50,7 +49,7 @@ class QueueConsumer(AsyncWebsocketConsumer):
         # Remove the user from their matchmaking group
         await self.channel_layer.group_discard(self.room_group_name, self.channel_name)
 
-        await remove_channel_name_from_session(self.scope, self.channel_name)
+        await remove_channel_name_from_session_api(self.scope, self.channel_name)
         # Remove the user's entry from the matchmaking queue
         await self.delete_queue_entry()
         await self.close()
