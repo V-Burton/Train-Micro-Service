@@ -10,111 +10,25 @@ services:
       - '80:80'
       - '443:443'
     depends_on:
-      - website
+      - pong_project
     command: /bin/bash -c "rm -f /etc/nginx/sites-enabled/default && 
               rm -f /etc/nginx/sites-available/default && nginx -g 'daemon off;'"
 
-  main:
-    build:
-      context: ./Micro-Services/main/src
-      dockerfile: Dockerfile
-    environment:
-      - HOST_IP=${HOST_IP}
-    volumes:
-      - ./Micro-Services/main/src:/app
-    ports:
-      - "8001:8000"
-    networks:
-      - main
-    depends_on:
-      - main_db
-    restart: on-failure
-
-  main_db:
-    image: postgres:16-bookworm
-    volumes:
-      - main_db:/var/lib/postgresql/data
-    environment:
-      POSTGRES_DB: main_db
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: yourpassword
-    networks:
-      - main
-    restart: on-failure
-
-  matchmaking:
-    build:
-      context: ./Micro-Services/matchmaking/src
-      dockerfile: Dockerfile
-    environment:
-      - HOST_IP=${HOST_IP}
-    volumes:
-      - ./Micro-Services/matchmaking/src:/app
-    ports:
-      - "8002:8000"
-    networks:
-      - auth
-    depends_on:
-      - matchmaking_db
-    restart: on-failure
-
-
-  matchmaking_db:
-    image: postgres:16-bookworm
-    volumes:
-      - auth_db:/var/lib/postgresql/data
-    environment:
-      POSTGRES_DB: matchmaking_db
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: yourpassword
-    networks:
-      - auth
-    ports:
-      - 5432
-    restart: on-failure
-
-
-  pong_app:
-    build:
-      context: ./Micro-Services/pong_app
-      dockerfile: Dockerfile
-    volumes:
-      - ./Micro-Services/pong_app:/app
-    ports:
-      - "8003:8000"
-    networks:
-      - pong_app
-    depends_on:
-      - pong_app_db
-    restart: on-failure
-
-
-  pong_app_db:
-    image: postgres:16-bookworm
-    volumes:
-      - pong_app_db:/var/lib/postgresql/data
-    environment:
-      POSTGRES_DB: pong_app_db
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: yourpassword
-    networks:
-      - pong_app
-    restart: on-failure
-
   pong_project:
     build:
-      context: ./Micro-Services/pong_project
+      context: ./Micro-Services/pong_project/
       dockerfile: Dockerfile
+    environment:
+      - HOST_IP=${HOST_IP}
     volumes:
-      - ./Micro-Services/pong_project:/app
+      - ./Micro-Services/pong_project/:/app
     ports:
-      - "8004:8000"
+      - "8001:8000"
     networks:
       - pong_project
     depends_on:
       - pong_project_db
     restart: on-failure
-
 
   pong_project_db:
     image: postgres:16-bookworm
@@ -128,58 +42,63 @@ services:
       - pong_project
     restart: on-failure
 
-  tournament:
+  alias:
     build:
-      context: ./Micro-Services/tournament
+      context: ./Micro-Services/alias/
       dockerfile: Dockerfile
+    environment:
+      - HOST_IP=${HOST_IP}
     volumes:
-      - ./Micro-Services/tournament:/app
+      - ./Micro-Services/alias/:/app
     ports:
-      - "8005:8000"
+      - "8002:8000"
     networks:
-      - tournament
+      - alias
     depends_on:
-      - tournament_db
+      - alias_db
     restart: on-failure
 
 
-  tournament_db:
+  alias_db:
     image: postgres:16-bookworm
     volumes:
-      - tournament_db:/var/lib/postgresql/data
+      - alias_db:/var/lib/postgresql/data
     environment:
-      POSTGRES_DB: tournament_db
+      POSTGRES_DB: alias_db
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: yourpassword
     networks:
-      - tournament
+      - alias
+    ports:
+      - 5432
     restart: on-failure
 
-  users:
+
+  game_app:
     build:
-      context: ./Micro-Services/users
+      context: ./Micro-Services/game_app
       dockerfile: Dockerfile
     volumes:
-      - ./Micro-Services/users:/app
+      - ./Micro-Services/game_app:/app
     ports:
-      - "8006:8000"
+      - "8003:8000"
     networks:
-      - users
+      - game_app
     depends_on:
-      - users_db
+      - game_app_db
     restart: on-failure
 
 
-  users_db:
+  game_app_db:
     image: postgres:16-bookworm
     volumes:
-      - users_db:/var/lib/postgresql/data
+      - game_app_db:/var/lib/postgresql/data
     environment:
-      POSTGRES_DB: users_db
+      POSTGRES_DB: game_app_db
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: yourpassword
     networks:
-      - users
+      - game_app
     restart: on-failure
 
   prometheus:
@@ -193,8 +112,9 @@ services:
     ports:
      - "9090:9090"
     networks:
-    - main
-    - auth
+    - pong_project
+    - alias
+    - game_app
     restart: on-failure
 
   grafana:
@@ -213,8 +133,9 @@ services:
     ports:
       - "3000:3000"
     networks:
-    - main
-    - auth
+    - pong_project
+    - alias
+    - game_app
     restart: on-failure
 
   node_exporter:
@@ -232,26 +153,19 @@ services:
       - '^/(sys|proc|dev|host|etc)($$|/)'
 
 volumes:
-  main_db:
+  alias_db:
     driver: local
     driver_opts:
       type: 'none'
       o: 'bind'
-      device: $MAIN_DB_VOL
+      device: $ALIAS_DB_VOL
 
-  matchmaking_db:
+  game_app_db:
     driver: local
     driver_opts:
       type: 'none'
       o: 'bind'
-      device: $MATCHMAKING_DB_VOL
-
-  pong_app_db:
-    driver: local
-    driver_opts:
-      type: 'none'
-      o: 'bind'
-      device: $PONG_APP_DB_VOL
+      device: $GAME_APP_DB_VOL
 
   pong_project_db:
     driver: local
@@ -260,33 +174,15 @@ volumes:
       o: 'bind'
       device: $PONG_PROJECT_DB_VOL
 
-  tournament_db:
-    driver: local
-    driver_opts:
-      type: 'none'
-      o: 'bind'
-      device: $TOURNAMENT_DB_VOL
-
-  users_db:
-    driver: local
-    driver_opts:
-      type: 'none'
-      o: 'bind'
-      device: $USERS_DB_VOL
-
   grafana-storage:
 
   prometheus-storage:
 
 
 networks:
-  main:
-    driver: bridge
-  auth:
-    driver: bridge
-  pong_app:
-    driver: bridge
   pong_project:
     driver: bridge
-  tournament:
+  alias:
+    driver: bridge
+  game_app:
     driver: bridge

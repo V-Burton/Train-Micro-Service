@@ -1,5 +1,0 @@
-from rest_framework import serializers
-
-class SessionUpdateSerializer(serializers.Serializer):
-    user_id = serializers.IntegerField()
-    session_id = serializers.CharField()
