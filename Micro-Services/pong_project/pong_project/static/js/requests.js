@@ -18,6 +18,8 @@ export async function send_alias_request() {
 
 		if (!response.ok) {
 			throw new Error('Network response was not ok: ' + response.statusText);
+		} else {
+			localStorage.setItem("jwt", response.token);
 		}
 
 		div_handler("game-menu-div");
@@ -53,12 +55,7 @@ export async function send_get_alias_request() {
 
 export async function send_user_input(input, time) {
 
-	const dataToSend = {
-		input: input,
-		time: time,
-		alias: alias
-	};
-
+	const token = localStorage.getItem("jwt");
 	try {
 		if (window.game_session === null || window.game_session.id === 0)
 			return;
@@ -66,11 +63,12 @@ export async function send_user_input(input, time) {
 		const response = await fetch(`http://localhost:8003/${window.game_session.id}/`, {
 			method: 'PUT',
 			headers: {
+				'Authorization': `Bearer ${token}`,
 				'Content-Type': 'application/json',
 				'X-CSRFToken': get_cookie("csrftoken"),
 			},
 			credentials: 'include',
-			body: JSON.stringify(dataToSend),
+			body: JSON.stringify([input, time]),
 		});
 
 		if (!response.ok) {
@@ -82,11 +80,14 @@ export async function send_user_input(input, time) {
 }
 
 export async function send_game_creation_request() {
+
+	const token = localStorage.getItem("jwt");
+	console.log(token);
 	try {
-		console.log("alias2= ", alias);
 		const response = await fetch('http://localhost:8003/', {
 			method: 'POST',
 			headers: {
+				'Authorization': `Bearer ${token}`,
 				'Content-Type': 'application/json',
 				'X-CSRFToken': get_cookie("csrftoken"),
 			},

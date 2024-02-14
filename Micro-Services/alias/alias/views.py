@@ -1,5 +1,7 @@
 import re
 import json
+import jwt
+import datetime
 
 from django.http import JsonResponse
 from django.contrib.sessions.models import Session
@@ -43,7 +45,7 @@ def alias_view(request):
                 return JsonResponse({"error": "Alias already in use"}, status=400)
 
         request.session["alias"] = alias
-        return JsonResponse({"message": "Alias set successfully", "alias": alias}, status=200)
+        return JsonResponse({"message": "Alias set successfully", "alias": alias, "token": create_token(alias)}, status=200)
 
     else:
         # If the request method is not GET, POST, or PUT
@@ -52,3 +54,4 @@ def alias_view(request):
         )
         response["Allow"] = "GET, POST, PUT"
         return response
+    

@@ -7,7 +7,6 @@ from .pong import constants as g
 
 from django.http import JsonResponse, StreamingHttpResponse
 
-
 def game_create_view(request):
     # Check the HTTP method
     if request.method != "POST":
@@ -15,36 +14,38 @@ def game_create_view(request):
         response["Allow"] = "POST"
         return response
 
-    # Verify that the client has an alias
-    alias = request.session.get("alias")
-    if alias is None:
-        return JsonResponse({"error": "Please pick an alias first1"}, status=400)
+    # Verify that the client has an username
+    # username = request.session.get("username")
+    user_id = getattr(request, 'user_id', None)
+    if user_id is None:
+        return JsonResponse({"error": "Please pick an user_id first1"}, status=400)
 
     # Check for an active game session for this user or a game session waiting for a second player
-    has_session, waiting_game = session.session_has(alias), session.session_waiting(alias)
+    has_session, waiting_game = session.session_has(user_id), session.session_waiting(user_id)
     if has_session or waiting_game:
         data = session.session_get_state(has_session) if has_session else session.session_get_state(waiting_game)
         return JsonResponse({"id": data["id"]}, status=200)
 
     # Create a new game
     game_id = uuid.uuid4()
-    session.session_create(game_id, alias)
+    session.session_create(game_id, user_id)
     return JsonResponse({"id": game_id}, status=201)
 
 
 def game_view(request, game_id: uuid.UUID):
 
-    # Verify that the client has an alias
-    alias = request.session.get("alias")
-    if alias is None:
-        return JsonResponse({"error": "Please pick an alias first2"}, status=400)
+    # Verify that the client has an user_id
+    # user_id = request.session.get("user_id")
+    user_id = getattr(request, 'user_id', None)
+    if user_id is None:
+        return JsonResponse({"error": "Please pick an username first2"}, status=400)
 
     # Check that the game exists
     if not session.session_exists(game_id):
         return JsonResponse({"error": "Invalid game ID"}, status=403)
 
     # Check that the client is part of that game
-    if not session.session_is_in(game_id, alias):
+    if not session.session_is_in(game_id, username):
         return JsonResponse({"error": "You are not part of this game"}, status=403)
 
     # Handle PUT request for updating game state
@@ -61,7 +62,7 @@ def game_view(request, game_id: uuid.UUID):
         if input not in g.INPUTS:
             return JsonResponse({"error": "Invalid value for 'input'"}, status=400)
 
-        session.session_add_input(game_id, alias, input, timestamp)
+        session.session_add_input(game_id, username, input, timestamp)
         return JsonResponse({}, status=200)
 
     # Handle GET request for streaming game state
