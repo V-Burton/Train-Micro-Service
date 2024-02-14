@@ -35,16 +35,19 @@ function sendLoginForm(csrftoken){
 		body: JSON.stringify({ username, password }),
 		credentials: 'include'
 	})
-	.then(response => response.text())
-	.then(html => {
-		if (html.includes('Indentifiant ou mot de passe incorrect.')){
-			authFormContainer.innerHTML = html;
-		}
-		else {
-			localStorage.setItem('csrftoken', csrftoken);
-			statusUser.innerHTML = html;
-			document.getElementById('statusUser').innerHTML = html;
-			authFormContainer.innerHTML = ''
+	.then(response => response.json())
+	.then(data => {
+		if (data.token) {
+			console.log(data.token);
+			localStorage.setItem('jwt', data.token);
+			console.log('login successful');
+			fetch("../../../templates/home.html")
+				.then(response => response.text())
+                .then(html => {
+                    document.getElementById('authFormContainer').innerHTML = html;
+                });
+		} else {
+			console.error('Login failed')
 		}
 	})
 	.catch(error => {

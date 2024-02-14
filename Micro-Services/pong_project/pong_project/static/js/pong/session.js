@@ -38,7 +38,10 @@ export function session_create(id, type) {
 		window.game_session.name1 = "Player 1";
 		window.game_session.name2 = type === g.TYPE_LOCAL ? "Player 2" : "Computer";
 	}
-	window.event_source = id === 0 ? null : new EventSource(`http://localhost:8003/${id}/`);
+	const token = localStorage.getItem("jwt");
+	const url = `http://localhost:8003/${id}/?token=${encodeURIComponent(token)}`;
+	const eventSource = new EventSource(url);
+	window.event_source = id === 0 ? null : new EventSource(url);
 	div_handler("game-div");
 	update_loop_start();
 }

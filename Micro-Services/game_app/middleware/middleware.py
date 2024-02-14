@@ -24,6 +24,7 @@ class JWTAuthenticationMiddleware:
                 
                 payload = jwt_decode(token)
                 request.user_id = payload.get('user_id')
+                logger.error("i want to see it", request.user_id)
             except jwt.ExpiredSignatureError:
                 logger.error(f"Unexpected error: 1")
                 return JsonResponse({'error': 'Token has expired'}, status=401)

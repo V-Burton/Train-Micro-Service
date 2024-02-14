@@ -24,7 +24,7 @@ def register_form(request):
     try:
         return render(request, 'register_form.html')
     except Exception as e:
-        logger.error(f"Error in register_form view: {e}")
+        loggerA.error(f"Error in register_form view: {e}")
         raise
 
 def login_form(request):
@@ -65,12 +65,13 @@ def login_user(request):
 
         if user is not None:
             login(request, user)
-            # token = generate_jwt_token(user),
-            # return JsonResponse({'token': token})
-            return render(request, 'home.html')
+            token = generate_jwt_token(user),
+            return JsonResponse({'token': token, 'message': 'Login successful'})
+            # return render(request, 'home.html')
         else:
-            messages.info(request, "Indentifiant ou mot de passe incorrect.")
-
+            return JsonResponse({'error': 'Invalid username or password'}, status=401)
+    # else:
+    #     return JsonResponse({'error': 'HTTP method not allowed'}, status=405)
     form = AuthenticationForm()
     return render(request, "login.html", {"form": form})
 
@@ -107,7 +108,7 @@ def check_authentication(request):
 def generate_jwt_token(user):
 
     dt = datetime.datetime.now() + datetime.timedelta(hours=1)
-
+    logger.error(user.id)
     token = jwt.encode({
         'user_id': user.id,  # Use user ID or any other user identifier
         'exp': int(dt.strftime('%s'))  # Expiry date

@@ -4,6 +4,13 @@ import json
 
 from .pong import session as session
 from .pong import constants as g
+import logging
+
+import jwt
+from django.http import HttpResponse
+from . import settings
+
+logger = logging.getLogger(__name__)
 
 from django.http import JsonResponse, StreamingHttpResponse
 
@@ -17,6 +24,7 @@ def game_create_view(request):
     # Verify that the client has an username
     # username = request.session.get("username")
     user_id = getattr(request, 'user_id', None)
+    logger.error('user_id1 =', user_id)
     if user_id is None:
         return JsonResponse({"error": "Please pick an user_id first1"}, status=400)
 
@@ -34,9 +42,25 @@ def game_create_view(request):
 
 def game_view(request, game_id: uuid.UUID):
 
+    token = request.GET.get('token', None)
+    if token:
+        try:
+            payload = jwt.decode(token, settings.SECRET_KEY, algorithms=["HS256"])
+            # Utilisez les informations du payload comme nécessaire
+            # Par exemple : user_id = payload['user_id']
+        except jwt.ExpiredSignatureError:
+            return HttpResponse('Token has expired', status=401)
+        except jwt.InvalidTokenError:
+            return HttpResponse('Invalid token', status=401)
+        # Générez votre réponse SSE ici
+    else:
+        return HttpResponse('Token is required', status=400)
+    
     # Verify that the client has an user_id
     # user_id = request.session.get("user_id")
+    request.user_id = payload.get('user_id')
     user_id = getattr(request, 'user_id', None)
+    logger.error('user_id2 =', user_id)
     if user_id is None:
         return JsonResponse({"error": "Please pick an username first2"}, status=400)
 
@@ -45,7 +69,7 @@ def game_view(request, game_id: uuid.UUID):
         return JsonResponse({"error": "Invalid game ID"}, status=403)
 
     # Check that the client is part of that game
-    if not session.session_is_in(game_id, username):
+    if not session.session_is_in(game_id, user_id):
         return JsonResponse({"error": "You are not part of this game"}, status=403)
 
     # Handle PUT request for updating game state
@@ -62,7 +86,7 @@ def game_view(request, game_id: uuid.UUID):
         if input not in g.INPUTS:
             return JsonResponse({"error": "Invalid value for 'input'"}, status=400)
 
-        session.session_add_input(game_id, username, input, timestamp)
+        session.session_add_input(game_id, user_id, input, timestamp)
         return JsonResponse({}, status=200)
 
     # Handle GET request for streaming game state
