@@ -24,7 +24,7 @@ def register_form(request):
     try:
         return render(request, 'register_form.html')
     except Exception as e:
-        loggerA.error(f"Error in register_form view: {e}")
+        logger.error(f"Error in register_form view: {e}")
         raise
 
 def login_form(request):

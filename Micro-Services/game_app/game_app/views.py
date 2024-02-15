@@ -7,6 +7,7 @@ from .pong import constants as g
 import logging
 
 import jwt
+from django.http import QueryDict
 from django.http import HttpResponse
 from . import settings
 
@@ -41,8 +42,9 @@ def game_create_view(request):
 
 
 def game_view(request, game_id: uuid.UUID):
-
-    token = request.GET.get('token', None)
+##################################################################
+    token = get_token_from_request(request)
+    logger.error("let's see this token", token)
     if token:
         try:
             payload = jwt.decode(token, settings.SECRET_KEY, algorithms=["HS256"])
@@ -54,8 +56,9 @@ def game_view(request, game_id: uuid.UUID):
             return HttpResponse('Invalid token', status=401)
         # Générez votre réponse SSE ici
     else:
+        logger.error("occurs here")
         return HttpResponse('Token is required', status=400)
-    
+###################################################################  
     # Verify that the client has an user_id
     # user_id = request.session.get("user_id")
     request.user_id = payload.get('user_id')
@@ -114,3 +117,36 @@ def game_view(request, game_id: uuid.UUID):
         response = JsonResponse({"error": "Invalid HTTP method: GET or PUT required"}, status=405)
         response["Allow"] = "GET, PUT"
         return response
+    
+
+import json
+
+def get_token_from_request(request):
+    token = request.GET.get('token')
+    
+    if token:
+        return token
+    
+    if request.method in ['POST', 'PUT']:
+        # Tentez de lire le corps de la requête comme JSON
+        try:
+            body = json.loads(request.body.decode('utf-8'))  # Assurez-vous de décoder le corps de la requête
+            # Gérez le cas où le corps est un dictionnaire
+            if isinstance(body, dict):
+                token = body.get('token')
+            # Gérez le cas où le corps est une liste
+            elif isinstance(body, list):
+                # Vous pouvez ajuster cette logique en fonction de la structure attendue de votre liste
+                for item in body:
+                    if isinstance(item, dict) and 'token' in item:
+                        token = item.get('token')
+                        break
+        except json.JSONDecodeError:
+            pass
+    
+    if not token:
+        token = request.headers.get('Authorization')
+        if token and token.startswith('Bearer '):
+            token = token.split(' ')[1]
+    
+    return token

@@ -1,7 +1,9 @@
+import { get_cookie, div_handler } from '../utils.js';
+
 let isRegisterForm = false;
 let isLoginForm = false;
 document.addEventListener('DOMContentLoaded', function() {
-	const csrftoken = localStorage.getItem('csrftoken');
+	const csrftoken = get_cookie('csrftoken');
 
     firstView();
 	statusUser.addEventListener('click', function() {
