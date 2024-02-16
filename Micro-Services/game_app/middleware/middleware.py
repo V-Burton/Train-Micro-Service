@@ -23,5 +23,15 @@ class JWTAuthenticationMiddleware:
             except ValueError as e:
                 return JsonResponse({'error': str(e)}, status=401)
 
-        response = self.get_response(request)
-        return response
+        return self.get_response(request)
+    def get_token(request):
+        authorization_header = request.META.get('HTTP_AUTHORIZATION')
+        if authorization_header:
+            try:
+                prefix, token = authorization_header.split(' ')
+                if prefix.lower() == 'bearer':
+                    return token
+                
+            except ValueError:
+                pass
+        return request.GET.get('token')

@@ -60,7 +60,7 @@ def game_view(request, game_id: uuid.UUID):
         return HttpResponse('Token is required', status=400)
 ###################################################################  
     # Verify that the client has an user_id
-    # user_id = request.session.get("user_id")
+    user_id = request.session.get("user_id")
     request.user_id = payload.get('user_id')
     user_id = getattr(request, 'user_id', None)
     logger.error('user_id2 =', user_id)
@@ -118,9 +118,6 @@ def game_view(request, game_id: uuid.UUID):
         response["Allow"] = "GET, PUT"
         return response
     
-
-import json
-
 def get_token_from_request(request):
     token = request.GET.get('token')
     

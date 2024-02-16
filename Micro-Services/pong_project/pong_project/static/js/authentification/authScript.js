@@ -28,7 +28,6 @@ function sendLoginForm(){
 	const formData = new FormData(event.target); // Use the event target which is the form
 	const username = formData.get('username');
 	const password = formData.get('password');
-	console.log(csrftoken);
 	fetch('http://localhost:8002/login/', {
 		method: 'POST',
 		headers: {
