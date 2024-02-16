@@ -59,17 +59,22 @@ MIDDLEWARE = [
 	'django_prometheus.middleware.PrometheusAfterMiddleware',
 ]
 
-CORS_ALLOWED_ORIGINS = [
-	'http://localhost:8001',
-    'http://localhost:8002',
-    'http://localhost:8003'
-]
+CORS_ALLOW_CREDENTIALS = True
 
-CSRF_COOKIE_DOMAIN = '.localhost::8001'
+# CORS_ALLOWED_ORIGINS = [
+# 	'http://localhost:8001',
+#     'http://localhost:8002',
+#     'http://localhost:8003'
+# ]
+
+# CORS_ORIGIN_WHITELIST = [
+#      'http://localhost:8001',  # URL of your SPA
+# ]
+
+# CSRF_COOKIE_DOMAIN = '.localhost::8001'
 
 ROOT_URLCONF = 'pong_project.urls'
 
-ROOT_URLCONF = "pong_project.urls"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",

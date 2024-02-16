@@ -66,6 +66,7 @@ CORS_ALLOWED_ORIGINS = [
     'http://localhost:8003'
 ]
 
+
 CORS_ALLOW_CREDENTIALS = True
 
 CORS_ORIGIN_WHITELIST = [

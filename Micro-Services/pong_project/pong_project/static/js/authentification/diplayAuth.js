@@ -3,7 +3,7 @@ import { get_cookie, div_handler } from '../utils.js';
 let isRegisterForm = false;
 let isLoginForm = false;
 document.addEventListener('DOMContentLoaded', function() {
-	const csrftoken = get_cookie('csrftoken');
+	const csrftoken = localStorage.getItem('csrftoken');
 
     firstView();
 	statusUser.addEventListener('click', function() {
@@ -49,6 +49,7 @@ function viewToDisplay(csrftoken, targetId){
 }
 
 function displayLogout(csrftoken){
+	console.log("check:", csrftoken);
 	fetch('http://localhost:8002/logout/', {
 		method: 'POST',
 		credentials: 'include',

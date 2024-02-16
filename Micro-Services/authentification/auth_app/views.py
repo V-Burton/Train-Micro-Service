@@ -67,11 +67,8 @@ def login_user(request):
             login(request, user)
             token = generate_jwt_token(user),
             return JsonResponse({'token': token, 'message': 'Login successful'})
-            # return render(request, 'home.html')
         else:
             return JsonResponse({'error': 'Invalid username or password'}, status=401)
-    # else:
-    #     return JsonResponse({'error': 'HTTP method not allowed'}, status=405)
     form = AuthenticationForm()
     return render(request, "login.html", {"form": form})
 
@@ -91,10 +88,9 @@ def register(request):
         form = UserCreationForm(data)
         if form.is_valid():
             form.save()
-            return render(request, 'home.html')
+            return JsonResponse({'register': True, 'message': 'Register successful'})
         else:
             print(form.errors)
-
     else:
         form = UserCreationForm()
     return render(request, "register.html", {"form": form})
@@ -106,9 +102,7 @@ def check_authentication(request):
         return JsonResponse({'isAuthenticated': False})
 
 def generate_jwt_token(user):
-
     dt = datetime.datetime.now() + datetime.timedelta(hours=1)
-    logger.error(user.id)
     token = jwt.encode({
         'user_id': user.id,  # Use user ID or any other user identifier
         'exp': int(dt.strftime('%s'))  # Expiry date

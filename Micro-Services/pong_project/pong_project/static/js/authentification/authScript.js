@@ -1,7 +1,8 @@
 import { get_cookie, div_handler } from '../utils.js';
 
 document.addEventListener('DOMContentLoaded', function() {
-	const csrftoken = get_cookie('csrftoken');
+	const csrftoken = getCookie("csrftoken");
+	localStorage.setItem('csrftoken', csrftoken);
     const authFormContainer = document.getElementById('authFormContainer');
     const statusUser = document.getElementById('statusUser');
 	console.log(csrftoken);
@@ -27,7 +28,7 @@ function sendLoginForm(csrftoken){
 	const formData = new FormData(event.target); // Use the event target which is the form
 	const username = formData.get('username');
 	const password = formData.get('password');
-
+	console.log(csrftoken);
 	fetch('http://localhost:8002/login/', {
 		method: 'POST',
 		headers: {
@@ -43,11 +44,11 @@ function sendLoginForm(csrftoken){
 			console.log(data.token);
 			localStorage.setItem('jwt', data.token);
 			console.log('login successful');
-			fetch("../../../templates/home.html")
-				.then(response => response.text())
-                .then(html => {
-                    document.getElementById('authFormContainer').innerHTML = html;
-                });
+			// fetch("../../../templates/home.html")
+			// 	.then(response => response.text())
+            //     .then(html => {
+            //         document.getElementById('authFormContainer').innerHTML = html;
+            //     });
 		} else {
 			console.error('Login failed')
 		}
@@ -60,7 +61,6 @@ function sendLoginForm(csrftoken){
 function sendRegisterForm(csrftoken){
 	const formData = new FormData(event.target); // Use the event target which is the form
 	const username = formData.get('username');
-	// const email = formData.get('email');
 	const password1 = formData.get('password1');
 	const password2 = formData.get('password2');
 
@@ -73,12 +73,36 @@ function sendRegisterForm(csrftoken){
 		body: JSON.stringify({ username, password1, password2 }),
 		credentials: 'include'
 	})
-	.then(response => response.text())
-	.then(html => {
-		authFormContainer.innerHTML = html;
-		document.getElementById('authFormContainer').innerHTML = html;
+	.then(response => response.json())
+	.then(data => {
+		if (data.register) {
+			console.log(data.register);
+			console.log('Register successful');
+			// fetch("../../../templates/register.html")
+			// 	.then(response => response.text())
+            //     .then(html => {
+            //         document.getElementById('authFormContainer').innerHTML = html;
+            //     });
+		} else {
+			console.error('Register failed')
+		}
 	})
 	.catch(error => {
 		console.error('Error:', error);
 	});
+}
+
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
 }
