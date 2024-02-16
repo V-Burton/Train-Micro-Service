@@ -12,18 +12,18 @@ document.addEventListener('DOMContentLoaded', function() {
     authFormContainer.addEventListener('submit', function(event) {
 		event.preventDefault(); // Prevent the default form submission
         if (event.target.id === 'registerForm') {
-			sendRegisterForm(csrftoken);
+			sendRegisterForm();
         }
 
         if (event.target.id === 'loginForm') {
-			sendLoginForm(csrftoken);
+			sendLoginForm();
         }
 
 
     });
 });
 
-function sendLoginForm(csrftoken){
+function sendLoginForm(){
 
 	const formData = new FormData(event.target); // Use the event target which is the form
 	const username = formData.get('username');
@@ -33,7 +33,7 @@ function sendLoginForm(csrftoken){
 		method: 'POST',
 		headers: {
 			'Content-Type': 'application/json',
-			'X-CSRFToken': csrftoken,
+			'X-CSRFToken': localStorage.getItem('csrftoken'),
 		},
 		body: JSON.stringify({ username, password }),
 		credentials: 'include'
@@ -58,7 +58,7 @@ function sendLoginForm(csrftoken){
 	});
 }
 
-function sendRegisterForm(csrftoken){
+function sendRegisterForm(){
 	const formData = new FormData(event.target); // Use the event target which is the form
 	const username = formData.get('username');
 	const password1 = formData.get('password1');
@@ -68,7 +68,7 @@ function sendRegisterForm(csrftoken){
 		method: 'POST',
 		headers: {
 			'Content-Type': 'application/json',
-			'X-CSRFToken': csrftoken,
+			'X-CSRFToken': localStorage.getItem('csrftoken'),
 		},
 		body: JSON.stringify({ username, password1, password2 }),
 		credentials: 'include'

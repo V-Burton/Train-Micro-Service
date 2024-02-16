@@ -8,7 +8,7 @@ document.addEventListener('DOMContentLoaded', function() {
     firstView();
 	statusUser.addEventListener('click', function() {
 		const targetId = event.target.id;
-		viewToDisplay(csrftoken, targetId);
+		viewToDisplay(targetId);
 	});
 });
 
@@ -24,7 +24,7 @@ function firstView(){
 	});
 }
 
-function viewToDisplay(csrftoken, targetId){
+function viewToDisplay(targetId){
 
 
         if (targetId == 'RegisterForm' && !isRegisterForm){
@@ -36,7 +36,7 @@ function viewToDisplay(csrftoken, targetId){
             isLoginForm = true;
             isRegisterForm = false;
         } else if (targetId == 'logout'){
-			displayLogout(csrftoken);
+			displayLogout();
             isLoginForm = false;
             isRegisterForm = false;
         } else {
@@ -48,21 +48,21 @@ function viewToDisplay(csrftoken, targetId){
 		console.log('lets go');
 }
 
-function displayLogout(csrftoken){
-	console.log("check:", csrftoken);
+function displayLogout(){
+	console.log("check:", localStorage.getItem('csrftoken'));
 	fetch('http://localhost:8002/logout/', {
 		method: 'POST',
 		credentials: 'include',
 		headers: {
 			'Content-Type': 'application/json',
-			'X-CSRFToken': csrftoken,
+			'X-CSRFToken': localStorage.getItem('csrftoken'),
 		}
 	})
 	.then(response => {
 		if (response.ok) {
 			localStorage.removeItem('authToken')
 			deleteCookie('sessionid');
-			updateUIForLoggedOutUser(csrftoken);
+			updateUIForLoggedOutUser();
 		}
 		console.log(response.ok)
 	})
