@@ -43,8 +43,8 @@ def game_create_view(request):
 
 def game_view(request, game_id: uuid.UUID):
 
-    user_id = getattr(request, 'user_id', None)
-    logger.error('user_id2 =', user_id)
+    user_id = getattr(request, 'player1', None)
+    logger.error('player =', user_id)
     if user_id is None:
         return JsonResponse({"error": "Please pick an username first2"}, status=400)
 

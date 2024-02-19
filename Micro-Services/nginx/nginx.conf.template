@@ -1,0 +1,52 @@
+# Define an upstream for each service
+upstream front_service {
+    server ${HOST_IP}:8001;
+}
+
+upstream auth_service {
+    server ${HOST_IP}:8002;
+}
+
+upstream game_service {
+    server ${HOST_IP}:8003;
+}
+
+# Server block for handling HTTPS connections
+server {
+    listen 8443 ssl;
+    server_name localhost ${HOST_IP};
+
+    ssl_certificate /etc/nginx/certs/cert.pem;
+    ssl_certificate_key /etc/nginx/certs/key.pem;
+    ssl_protocols TLSv1 TLSv1.1 TLSv1.2 TLSv1.3;
+    ssl_ciphers HIGH:!aNULL:!MD5;
+
+    # Redirect requests to the front service
+    location / {
+        proxy_pass https://front_service;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection 'upgrade';
+        proxy_set_header Host $host;
+        proxy_cache_bypass $http_upgrade;
+    }
+
+    # Redirect requests to the auth service
+    location /auth/ {
+        proxy_pass https://auth_service;
+        proxy_set_header Host $host;
+    }
+
+    # Redirect requests to the game service
+    location /game/ {
+        proxy_pass https://game_service;
+        proxy_set_header Host $host;
+    }
+}
+
+# Server block for redirecting HTTP to HTTPS
+server {
+    listen 80 default_server;
+    server_name _;
+    return 301 https://$host$request_uri;
+}

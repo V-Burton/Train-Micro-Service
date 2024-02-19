@@ -50,7 +50,7 @@ function viewToDisplay(targetId){
 
 function displayLogout(){
 	console.log("check:", localStorage.getItem('csrftoken'));
-	fetch('http://localhost:8002/logout/', {
+	fetch('https://${HOST_IP}:8002/logout/', {
 		method: 'POST',
 		credentials: 'include',
 		headers: {
@@ -60,7 +60,7 @@ function displayLogout(){
 	})
 	.then(response => {
 		if (response.ok) {
-			localStorage.removeItem('authToken')
+			localStorage.removeItem('jwt')
 			deleteCookie('sessionid');
 			updateUIForLoggedOutUser();
 		}
@@ -72,7 +72,7 @@ function displayLogout(){
 }
 
 function displayLogin(){
-	fetch('http://localhost:8002/login/')  // Update this URL to your actual authentication service URL
+	fetch('https://${HOST_IP}:8002/login/')  // Update this URL to your actual authentication service URL
 	.then(response => response.text())
 	.then(html => {
 		authFormContainer.innerHTML = html;
@@ -85,7 +85,7 @@ function displayLogin(){
 }
 
 function displayRegister(){
-	fetch('http://localhost:8002/register/')  // Update this URL to your actual authentication service URL
+	fetch('https://${HOST_IP}:8002/register/')  // Update this URL to your actual authentication service URL
 	.then(response => response.text())
 	.then(html => {
 		authFormContainer.innerHTML = html;
@@ -98,7 +98,7 @@ function displayRegister(){
 }
 
 function isLoggedIn() {
-    return fetch('http://localhost:8002/check-authentication/', {
+    return fetch('https://${HOST_IP}:8002/check-authentication/', {
         credentials: 'include'
     })
         .then(response => response.json())
@@ -114,7 +114,7 @@ function isLoggedIn() {
 
 
 function displayLoggedInUser(){
-    fetch('http://localhost:8002/home/', {
+    fetch('https://${HOST_IP}:8002/home/', {
         credentials: 'include'
     })
 	.then(response => {
@@ -134,7 +134,7 @@ function displayLoggedInUser(){
 }
 
 function updateUIForLoggedOutUser() {
-	return fetch('http://localhost:8002/buttons/')  // Update this URL to your actual authentication service URL
+	return fetch('https://${HOST_IP}:8002/buttons/')  // Update this URL to your actual authentication service URL
         .then(response => response.text())
         .then(html => {
             statusUser.innerHTML = html;
