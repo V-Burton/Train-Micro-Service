@@ -28,7 +28,8 @@ function sendLoginForm(){
 	const formData = new FormData(event.target); // Use the event target which is the form
 	const username = formData.get('username');
 	const password = formData.get('password');
-	fetch('http://localhost:8002/login/', {
+	console.log(localStorage.getItem('csrftoken'));
+	fetch('https://localhost:8443/auth/login/', {
 		method: 'POST',
 		headers: {
 			'Content-Type': 'application/json',
@@ -63,7 +64,7 @@ function sendRegisterForm(){
 	const password1 = formData.get('password1');
 	const password2 = formData.get('password2');
 
-	fetch('http://localhost:8002/register/', {
+	fetch('https://localhost:8443/auth/register/', {
 		method: 'POST',
 		headers: {
 			'Content-Type': 'application/json',
