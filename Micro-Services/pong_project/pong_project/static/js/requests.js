@@ -10,7 +10,7 @@ export async function send_user_input(input, time) {
 		if (window.game_session === null || window.game_session.id === 0)
 			return;
 
-		const response = await fetch(`http://localhost:8003/${window.game_session.id}/`, {
+		const response = await fetch(`https://localhost:8443/game/${window.game_session.id}/`, {
 			method: 'PUT',
 			headers: {
 				'Authorization': `Bearer ${token}`,
@@ -34,7 +34,7 @@ export async function send_game_creation_request() {
 	const token = localStorage.getItem("jwt");
 	console.log(token);
 	try {
-		const response = await fetch('http://localhost:8003/', {
+		const response = await fetch('https://localhost:8443/game/', {
 			method: 'POST',
 			headers: {
 				'Authorization': `Bearer ${token}`,
